@@ -1,4 +1,4 @@
-@PetStore
+@AddToCart
 Feature: Pet store feature
 
   Scenario: Pet store scenario

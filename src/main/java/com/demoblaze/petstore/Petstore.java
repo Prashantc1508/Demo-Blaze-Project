@@ -51,68 +51,35 @@ public class Petstore {
 	public static JSONObject Object = new JSONObject();
 	public static JSONArray array = new JSONArray();
 
-	// Connect Post URL
-	public void ConnectPOSTService(String httpsURL)
+	// Connect GET URL
+	public void ConnectGETService(String httpsURL)
 			throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+
 		SSLContextBuilder blder = new SSLContextBuilder();
 		blder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
 		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(blder.build());
 		httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-		post = new HttpPost(httpsURL);
-		//System.out.println("*************POST URL" + post);
+		get = new HttpGet(httpsURL);
 	}
 
-	// Add Headers to request
-	public void SendEncoded64Headers() {
-		post.setHeader("Content-Type", "application/json");
-	}
-
-	// Compile JSON String value and Add to request
-	public void GenerateJSONString(String JSONKeyName, String Body) {
-		message = Body;
-		// message = Object.toString();
-		System.out.println(">>> \n" + message);
-		// builder. addPart(formData(message));
+	// Send Get Service
+	public String SendGETService() throws IOException {
 		try {
-
-			builder.addPart("Content", new StringBody(message, ContentType.APPLICATION_JSON));
-		} catch (Exception e) {
-			System.out.println("Not compile json string++++++++++++++++++++++=");
-		}
-	}
-
-	public static FormBodyPart formData(String body) {
-		StringBody json = new StringBody(body, ContentType.APPLICATION_JSON);
-		StringBuilder buffer = new StringBuilder();
-		buffer.append("raw");
-		buffer.append("Content-Type: applicaton/json");
-		String cp = buffer.toString();
-		FormBodyPartBuilder partBuilsder = FormBodyPartBuilder.create("application/json", json);
-		partBuilsder.setField(MIME.CONTENT_DISPOSITION, cp);
-		FormBodyPart fbp = partBuilsder.build();
-		return fbp;
-
-	}
-
-	// Get response value
-	public static void GetValueFromPOSTResponse(String POSTKey) {
-		try {
-			Object obj = new JSONParser().parse(RespValue);
-
-			JSONObject jsonobject = (JSONObject) obj;
-			String POSTValue = (String) jsonobject.get(POSTKey);
-			System.out.println("Response Value" + POSTValue);
-			RespValue = POSTValue;
+			response = httpClient.execute(get);
+			responseEntity = response.getEntity();
+			int statusCode = response.getStatusLine().getStatusCode();
+			System.out.println("****************STATUS CODE" + statusCode);
+			InputStream Content = responseEntity.getContent();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(Content));
+			StringBuilder sb = new StringBuilder();
+			sb.append(reader.readLine());
+			Content.close();
+			RespValue = sb.toString();
 			System.out.println("Response" + RespValue);
 		} catch (Exception e) {
-			System.out.println(e.getStackTrace());
-		} finally {
-			if (!RespValue.equalsIgnoreCase(null)) {
-				System.out.println("SUCCESS");
-			} else {
-				System.out.println("FAIL");
-			}
+			System.err.println(e.getStackTrace());
 		}
+		return RespValue;
 	}
 
 	// ************************* new method for post
@@ -135,16 +102,16 @@ public class Petstore {
 			RespValue = sb.toString();
 			System.out.println("Response" + RespValue);
 		} catch (Exception ex) {
-		} 
-		return RespValue;
 		}
-	
+		return RespValue;
+	}
+
 	// ************************** new PUT method
 	public String SendPUTServiceNew(String URL, String Header) {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		try {
 			HttpPut request = new HttpPut(URL);
-			//HttpPost request = new HttpPost(URL);
+			// HttpPost request = new HttpPost(URL);
 			StringEntity params = new StringEntity(Header);
 			request.addHeader("Content-Type", "application/json");
 			request.setEntity(params);
@@ -160,9 +127,9 @@ public class Petstore {
 			RespValue = sb.toString();
 			System.out.println("Response" + RespValue);
 		} catch (Exception ex) {
-		} 
-		return RespValue;
 		}
+		return RespValue;
+	}
 
 	// ************************ new DELETE method
 	public String deleteService(String URL) {
@@ -181,10 +148,20 @@ public class Petstore {
 			RespValue = sb.toString();
 			System.out.println("Response" + RespValue);
 		} catch (Exception ex) {
-		} 
-		return RespValue;
 		}
-	
+		return RespValue;
+	}
+
+	// Connect Post URL
+	public void ConnectPOSTService(String httpsURL)
+			throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+		SSLContextBuilder blder = new SSLContextBuilder();
+		blder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(blder.build());
+		httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+		post = new HttpPost(httpsURL);
+	}
+
 	// Send POST request
 	public static void SendPOSTService() throws IOException {
 		try {
@@ -208,40 +185,6 @@ public class Petstore {
 		} finally {
 			response.close();
 		}
-	}
-
-	// Connect GET URL
-	public void ConnectGETService(String httpsURL) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-
-		SSLContextBuilder blder = new SSLContextBuilder();
-		blder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(blder.build());
-		httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-		get = new HttpGet(httpsURL);		
-		
-	}
-
-	public String SendGETService() throws IOException {
-		try {
-			response = httpClient.execute(get);
-			responseEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			System.out.println("****************STATUS CODE"+statusCode);
-			InputStream Content = responseEntity.getContent();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(Content));
-			StringBuilder sb = new StringBuilder();
-			sb.append(reader.readLine());
-			Content.close();
-			RespValue = sb.toString();
-			System.out.println("Response" + RespValue);
-			/*if(RespValue.contains("available")) {
-				System.out.println("");
-			}*/
-			
-		} catch (Exception e) {
-			System.err.println(e.getStackTrace());
-		} 
-		return RespValue;
 	}
 
 }
